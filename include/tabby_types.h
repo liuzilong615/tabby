@@ -1,8 +1,9 @@
-#ifndef CARACAL_TYPES_H
-#define CARACAL_TYPES_H
+#ifndef TABBY_TYPES_H
+#define TABBY_TYPES_H
 
 #include <stdint.h>
 
+// ATOMIC types
 typedef struct _ATOM_32 {
     volatile int32_t counter;
 } Atom32;
