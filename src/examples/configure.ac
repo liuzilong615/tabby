@@ -13,11 +13,15 @@ AM_INIT_AUTOMAKE
 AC_PROG_CC
 
 # Checks for libraries.
+AC_CHECK_LIB(pthread, pthread_create)
+AC_CHECK_LIB(pthread, pthread_join)
 
 # Checks for header files.
+AC_CHECK_HEADERS(pthread.h stdio.h)
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_INT32_T
+AC_TYPE_INT64_T
 
 # Checks for library functions.
 
