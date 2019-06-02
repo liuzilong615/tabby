@@ -23,7 +23,7 @@ typedef struct _List {
     // whether the list should be protected
     ListLockType list_lock_type;
     union {
-        pthread_spin_t s_lock;
+        pthread_spinlock_t s_lock;
         pthread_mutex_t m_lock;
         pthread_rwlock_t rw_lock;
     } list_lock;

@@ -1,4 +1,5 @@
 #include "tabby_list.h"
+#include "tabby_atom.h"
 #include <assert.h>
 
 static void list_init(List *l, ListLockType llt) {
@@ -25,4 +26,4 @@ static void list_init(List *l, ListLockType llt) {
     LIST_NODE_INIT(&l->list_head);
 }
 
-void tabby_list_init(List *l, ListLockType llt) __attribute__ ((alias (list_init)));
+void tabby_list_init(List *l, ListLockType llt) __attribute__ ((alias ("list_init")));

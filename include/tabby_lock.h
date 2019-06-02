@@ -11,7 +11,7 @@
     pthread_spin_destroy(lock)
 
 #define TABBY_SPIN_LOCK(lock) \
-    for ( pthread_spin_t *l = (lock), *k = (lock); l != NULL; pthread_spin_unlock(k) )\
+    for ( pthread_spinlock_t *l = (lock), *k = (lock); l != NULL; pthread_spin_unlock(k) )\
         for ( pthread_spin_lock(k); l!=NULL; l=NULL)
 
 // mutex (lock)
