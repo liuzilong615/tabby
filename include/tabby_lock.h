@@ -2,43 +2,49 @@
 #define _TABBY_LOCK_H
 
 #include <pthread.h>
+#include <assert.h>
 
-// spin (lock)
-#define TABBY_SPIN_INIT(lock) \
-    pthread_spin_init((lock), PTHREAD_PROCESS_PRIVATE)
+#include "tabby_macro.h"
 
-#define TABBY_SPIN_DESTROY(lock)\
-    pthread_spin_destroy(lock)
+typedef enum {
+    LOCK_NONE = 0,
+    LOCK_SPIN, 
+    LOCK_MUTEX,
+    LOCK_RW,
+    LOCK_MAX
+} LockType;
 
-#define TABBY_SPIN_LOCK(lock) \
-    for ( pthread_spinlock_t *l = (lock), *k = (lock); l != NULL; pthread_spin_unlock(k) )\
-        for ( pthread_spin_lock(k); l!=NULL; l=NULL)
+typedef struct _Lock {
+    LockType lock_type;
+    union {
+        pthread_spinlock_t s_lock;
+        pthread_mutex_t m_lock;
+        pthread_rwlock_t rw_lock;
+    } lock;
+} Lock ;
 
-// mutex (lock)
-#define TABBY_MUTEX_INIT(lock) \
-    pthread_mutex_init((lock), NULL)
+void tabby_lock_init(Lock *l, LockType type);
+void tabby_lock_destroy(Lock *l);
 
-#define TABBY_MUTEX_DESTROY(lock) \
-    pthread_mutex_destroy(lock)
+typedef int (*lock_func)(void *l);
+typedef int (*unlock_func)(void *l);
 
-#define TABBY_MUTEX_LOCK(lock) \
-    for ( pthread_mutex_t *l = (lock), *k = (lock); l != NULL; pthread_mutex_unlock(k) )\
-        for ( pthread_mutex_lock(k); l!=NULL; l=NULL)
+typedef struct __func_node {
+    lock_func __lock;
+    lock_func __lock2;
+    unlock_func __unlock;
+} FuncNode;
 
-// rwlock
-#define TABBY_RW_INIT(lock)\
-    pthread_rwlock_init((lock), NULL)
+extern FuncNode __fn[];
 
-#define TABBY_RW_DESTROY(lock)\
-    pthread_rwlock_destroy(lock)
-
-#define TABBY_WR_LOCK(lock)\
-    for ( pthread_rwlock_t *l = (lock), *k = (lock); l != NULL; pthread_rwlock_unlock(k) )\
-        for ( pthread_rwlock_wrlock(k); l!=NULL; l=NULL)
-
-#define TABBY_RD_LOCK(lock)\
-    for ( pthread_rwlock_t *l = (lock), *k = (lock); l != NULL; pthread_rwlock_unlock(k) )\
-        for ( pthread_rwlock_rdlock(k); l!=NULL; l=NULL)
+#define tabby_lock_area(lock, rd)\
+    uint32_t TABBY_VAR(idx) = (lock)->lock_type ;\
+    lock_func TABBY_VAR(ll) = __fn[idx].__lock;\
+    if ( rd ) TABBY_VAR(ll) = __fn[idx].__lock2;\
+    unlock_func TABBY_VAR(un) = __fn[idx].__unlock;\
+    assert( TABBY_VAR(idx) < LOCK_MAX );\
+    for ( void *TABBY_VAR(l) = &(lock->lock), *TABBY_VAR(k) = &(lock->lock); TABBY_VAR(l) != NULL; TABBY_VAR(un)( TABBY_VAR(k) ) )\
+        for ( TABBY_VAR(ll)( TABBY_VAR(k) ); TABBY_VAR(l)!=NULL; TABBY_VAR(l)=NULL)
 
 
 #endif

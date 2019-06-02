@@ -37,4 +37,5 @@ AS_IF([test "x$enable_debug"="xyes"], [CFLAGS="-g -DDEBUG -Wall"],
 
 AC_OUTPUT(Makefile 
         src/Makefile
-        src/list/Makefile)
+        src/list/Makefile
+        src/lock/Makefile)

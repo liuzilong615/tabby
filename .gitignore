@@ -67,3 +67,9 @@ missing
 autom4te.cache
 .deps
 autoscan.log
+.libs/*
+config.guess
+config.sub
+libtool
+ltmain.sh
+
