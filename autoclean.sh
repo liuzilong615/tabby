@@ -4,4 +4,6 @@ rm -rf aclocal.m4 compile config.status install-sh Makefile.in autom4te.cache co
 
 rm -rf autoscan.log config.guess config.sub libtool ltmain.sh Makefile .deps
 
-rm -rf list/Makefile.in list/Makefile list/.deps
+rm -rf src/Makefile.in src/Makefile src/.deps
+
+rm -rf src/list/Makefile.in src/list/Makefile src/list/.deps
