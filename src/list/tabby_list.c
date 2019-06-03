@@ -7,7 +7,7 @@ static void list_init(List *l, LockType type) {
 
     tabby_lock_init(&l->list_lock, type);
 
-    LIST_NODE_INIT(&l->list_head);
+    tabby_list_node_init(&l->list_head);
 }
 
 static void list_destroy(List *l) {

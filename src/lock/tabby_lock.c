@@ -34,13 +34,13 @@ static void lock_init(Lock *l, LockType type) {
         case LOCK_NONE:
             break;
         case LOCK_SPIN:
-            pthread_spin_init(&l->lock.s_lock, PTHREAD_PROCESS_PRIVATE);
+            pthread_spin_init(&l->lock_un.s_lock, PTHREAD_PROCESS_PRIVATE);
             break;
         case LOCK_MUTEX:
-            pthread_mutex_init(&l->lock.m_lock, NULL);
+            pthread_mutex_init(&l->lock_un.m_lock, NULL);
             break;
         case LOCK_RW:
-            pthread_rwlock_init(&l->lock.rw_lock, NULL);
+            pthread_rwlock_init(&l->lock_un.rw_lock, NULL);
             break;
         default:
             assert(0);
@@ -53,13 +53,13 @@ static void lock_destroy(Lock *l) {
         case LOCK_NONE:
             break;
         case LOCK_SPIN:
-            pthread_spin_destroy(&l->lock.s_lock);
+            pthread_spin_destroy(&l->lock_un.s_lock);
             break;
         case LOCK_MUTEX:
-            pthread_mutex_destroy(&l->lock.m_lock);
+            pthread_mutex_destroy(&l->lock_un.m_lock);
             break;
         case LOCK_RW:
-            pthread_rwlock_destroy(&l->lock.rw_lock);
+            pthread_rwlock_destroy(&l->lock_un.rw_lock);
             break;
         default:
             assert(0);
