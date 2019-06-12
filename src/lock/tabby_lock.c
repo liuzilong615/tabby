@@ -7,17 +7,17 @@ static int no_lock(void *l) {
 FuncNode __fn[LOCK_MAX] = {
     {
         .__lock = no_lock,
-        .__lock2 = NULL,
+        .__lock2 = no_lock,
         .__unlock = no_lock,
     },
     {
         .__lock = (lock_func )pthread_spin_lock,
-        .__lock2 = NULL,
+        .__lock2 = (lock_func )pthread_spin_lock,
         .__unlock = (unlock_func )pthread_spin_unlock,
     },
     {
         .__lock = (lock_func )pthread_mutex_lock,
-        .__lock2 = NULL,
+        .__lock2 = (lock_func )pthread_mutex_lock,
         .__unlock = (unlock_func )pthread_mutex_unlock,
     },
     {

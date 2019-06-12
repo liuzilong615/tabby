@@ -10,6 +10,7 @@ AM_INIT_AUTOMAKE
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_CC_STDC
 LT_INIT
 AC_PROG_RANLIB
 
@@ -29,7 +30,7 @@ AC_TYPE_INT64_T
 AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug], [enable DEBUG mode(default=no)]),
         [],
         [enable_debug=no])
-AS_IF([test "x$enable_debug"="xyes"], [CFLAGS="-g -DDEBUG -Wall"],
+AS_IF([test "x$enable_debug"="xyes"], [CFLAGS="-std=gnu99 -g -DDEBUG -Wall"],
         [test "x$enable_debug"="xno"], [CFLAGS="-O2 -Wall"],
         [])
 

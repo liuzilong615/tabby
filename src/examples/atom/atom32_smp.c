@@ -1,4 +1,4 @@
-#include "tabby_atom.h" 
+#include <tabby/tabby_atom.h>
 #include <stdio.h>
 #include <pthread.h>
 #include <assert.h>

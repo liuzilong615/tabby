@@ -14,7 +14,7 @@ AC_PROG_CC
 
 # Checks for libraries.
 AC_CHECK_LIB(pthread, pthread_create)
-AC_CHECK_LIB(pthread, pthread_join)
+AC_CHECK_LIB(tabby, tabby_list_new)
 
 # Checks for header files.
 AC_CHECK_HEADERS(pthread.h stdio.h)
@@ -32,4 +32,4 @@ AS_IF([test "x$enable_debug"="xyes"], [CFLAGS="-g -DDEBUG -Wall"],
         [test "x$enable_debug"="xno"], [CFLAGS="-O2 -Wall"],
         [])
 
-AC_OUTPUT(Makefile atom/Makefile)
+AC_OUTPUT(Makefile atom/Makefile list/Makefile)

@@ -23,6 +23,11 @@ struct _List {
      (l->list_head.next);\
      })
 
+#define _list_last(l) \
+    ({ \
+     (l->list_head.prev);\
+     })
+
 #define MALLOC(size) \
     malloc(size)
 
@@ -34,8 +39,11 @@ List *tabby_list_new(LockType type) __attribute__ ((alias ("_list_new")));
 void tabby_list_free(List *l) __attribute__ ((alias ("_list_free")));
 int tabby_list_append(List *l, void *data) __attribute__ ((alias ("_list_append")));
 int tabby_list_prepend(List *l, void *data) __attribute__ ((alias ("_list_prepend")));
-int tabby_list_del(List *l, void *data) __attribute__ ((alias ("_list_del")));
+int tabby_list_remove(List *l, void *data) __attribute__ ((alias ("_list_del")));
 int tabby_list_foreach(List *l, ListNodeProcess proc) __attribute__ ((alias ("_list_foreach")));
+
+void *tabby_list_unplug(List *l) __attribute__ ((alias ("_list_del_last")));
+void *tabby_list_preplug(List *l) __attribute__ ((alias ("_list_del_first")));
 
 static inline void tabby_list_node_init(List *l, ListNode *node) {
     node->prev = node;
@@ -124,6 +132,46 @@ int _list_del(List *l, void *data) {
     return ret;
 }
 
+void *_list_del_first(List *l) {
+    void *data = NULL;
+    ListNode *tmp, *n = NULL; 
+
+    tabby_lock_protect(&l->list_lock, 0)  {
+        tmp = _list_first(l);
+        if ( tmp != &l->list_head ) {
+            n = tmp;
+            data = n->data;
+            _do_list_del(l, n);
+            l->list_num--;
+        }
+    }
+
+    if ( n ) {
+        FREE(n);
+    }
+    return data;
+}
+
+void *_list_del_last(List *l) {
+    void *data = NULL;
+    ListNode *tmp, *n = NULL; 
+
+    tabby_lock_protect(&l->list_lock, 0)  {
+        tmp = _list_last(l);
+        if ( tmp != &l->list_head ) {
+            n = tmp;
+            data = n->data;
+            _do_list_del(l, n);
+            l->list_num--;
+        }
+    }
+
+    if ( n ) {
+        FREE(n);
+    }
+    return data;
+}
+
 int _list_foreach(List *l, ListNodeProcess proc) {
     int cnt, num;
     ListNode *n;
@@ -156,13 +204,15 @@ void _list_free(List *l) {
         while ( n != &l->list_head ) {
             _do_list_del(l, n);
             FREE(n);
-            n = &l->list_head;
+            n = _list_first(l);
             cnt++;
         }
 
         assert( cnt == num );
         l->list_num = 0;
     }
+
+    FREE(l);
 }
 
 
