@@ -8,7 +8,7 @@ typedef int (*RBTreeGetFunc)(void *value);
 typedef int (*RBTreePutFunc)(void *value);
 typedef int (*RBTreeDetachFunc)(void *key, void *value);
 
-typedef void (*RBTreeNodeProc)(void *key, void *value, int y, int x);
+typedef void (*RBTreeNodeProc)(void *key, void *value, int y, int x, int color);
 
 typedef struct _RBTree RBTree;
 

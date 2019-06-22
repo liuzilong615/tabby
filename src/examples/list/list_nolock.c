@@ -38,23 +38,23 @@ int main(int argc, char *argv[]) {
     assert( 3 == ret );
 
 
-    ret = (int64_t)tabby_list_unplug(l);
+    ret = (int64_t)tabby_list_detach(l);
     assert( 2 == ret );
 
-    ret = (int64_t)tabby_list_preplug(l);
+    ret = (int64_t)tabby_list_predetach(l);
     assert( 4 == ret );
 
     printf("====== show after remove 2, 4 ========\n");
     ret = tabby_list_foreach(l, node_process);
     assert( 1 == ret );
 
-    ret = (int64_t)tabby_list_unplug(l);
+    ret = (int64_t)tabby_list_detach(l);
     assert( ret == 3 );
 
-    ret = (int64_t)tabby_list_unplug(l);
+    ret = (int64_t)tabby_list_detach(l);
     assert( ret == 0 );
 
-    ret = (int64_t)tabby_list_preplug(l);
+    ret = (int64_t)tabby_list_predetach(l);
     assert( ret == 0 );
 
     printf("====== show empty ========\n");

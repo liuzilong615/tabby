@@ -46,7 +46,6 @@ typedef enum {
     COLOR_BLACK
 } RBColor;
 
-
 typedef struct _RBNode RBNode;
 struct _RBNode {
     RBColor color;
@@ -322,7 +321,7 @@ static void _rbtree_rebalance(RBTree *tree, RBNode *cur_node, RBNode *parent, Ch
 
     cur_type = _rbtree_child_type(cur, parent) ;
     par_type = _rbtree_child_type(parent, grandparent) ;
-    adj_case = (( cur_type << 1 ) & par_type);
+    adj_case = (int)(( (int)cur_type << 1 ) | (int)par_type);
 
     // switch adj_case, and do rebalance under different conditions
     switch ( adj_case ) {
@@ -427,7 +426,7 @@ static void _rbtree_recur(RBNode *node, RBTreeNodeProc proc, int y, int x, int *
         return ;
     }
     // root fisrt
-    proc(node->key, node->value, y, x);
+    proc(node->key, node->value, y, x, node->color);
     (*cnt)++;
 
     // then left
