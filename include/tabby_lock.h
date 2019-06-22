@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 #include <assert.h>
+#include <stdint.h>
 
 #include "tabby_macro.h"
 

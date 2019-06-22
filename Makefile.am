@@ -5,6 +5,7 @@ libtabby_la_SOURCES =
 libtabby_la_LDFLAGS = -version-info 0:0:0
 libtabby_la_LIBADD = \
          src/list/liblist.la \
+         src/tree/libtree.la \
          src/lock/liblock.la
 
 pkginclude_HEADERS = \
@@ -13,4 +14,5 @@ pkginclude_HEADERS = \
          include/tabby_lock.h  \
          include/tabby_types.h \
          include/tabby_macro.h \
+         include/tabby_tree.h \
          include/tabby_assert.h 

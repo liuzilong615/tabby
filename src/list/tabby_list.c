@@ -42,8 +42,8 @@ int tabby_list_prepend(List *l, void *data) __attribute__ ((alias ("_list_prepen
 int tabby_list_remove(List *l, void *data) __attribute__ ((alias ("_list_del")));
 int tabby_list_foreach(List *l, ListNodeProcess proc) __attribute__ ((alias ("_list_foreach")));
 
-void *tabby_list_unplug(List *l) __attribute__ ((alias ("_list_del_last")));
-void *tabby_list_preplug(List *l) __attribute__ ((alias ("_list_del_first")));
+void *tabby_list_detach(List *l) __attribute__ ((alias ("_list_del_last")));
+void *tabby_list_predetach(List *l) __attribute__ ((alias ("_list_del_first")));
 
 static inline void tabby_list_node_init(List *l, ListNode *node) {
     node->prev = node;

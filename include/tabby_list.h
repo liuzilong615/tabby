@@ -16,7 +16,7 @@ int tabby_list_prepend(List *l, void *data) ;
 int tabby_list_remove(List *l, void *data) ;
 
 int tabby_list_foreach(List *l, ListNodeProcess proc);
-void *tabby_list_unplug(List *l) ;
-void *tabby_list_preplug(List *l) ;
+void *tabby_list_detach(List *l) ;
+void *tabby_list_predetach(List *l) ;
 
 #endif
