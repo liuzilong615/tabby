@@ -20,5 +20,6 @@ RBTree *tabby_rbtree_new(LockType type,
 int tabby_rbtree_insert(RBTree *tree, void *key, void *value);
 int tabby_rbtree_foreach(RBTree *tree, RBTreeNodeProc proc);
 void tabby_rbtree_free(RBTree *tree);
+int tabby_rbtree_delete(RBTree *tree, void *key);
 
 #endif

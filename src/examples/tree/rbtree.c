@@ -143,6 +143,8 @@ int main() {
         if ( 2 == ret ) {
             if ( strcmp(cmd, "ins") == 0 ) {
                 tret = tabby_rbtree_insert(tree, (void *)(int64_t)value, NULL);
+            } else if ( strcmp(cmd, "del") == 0 ) {
+                tret = tabby_rbtree_delete(tree, (void *)(int64_t)value);
             }
         }
         clear();
