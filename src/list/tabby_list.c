@@ -16,6 +16,9 @@ struct _List {
     int list_num;
     Lock list_lock; // protect the list
     ListNode list_head;
+    // reference data for multi-thread cases
+    ListGetFunc l_get;
+    ListPutFunc l_put;
 } ;
 
 #define _list_first(l) \
@@ -36,6 +39,7 @@ struct _List {
 
 // external functions
 List *tabby_list_new(LockType type) __attribute__ ((alias ("_list_new")));
+List *tabby_list_new_ex(LockType type, ListGetFunc _get, ListPutFunc _put) __attribute__  ((alias("_list_new_ex"))); 
 void tabby_list_free(List *l) __attribute__ ((alias ("_list_free")));
 int tabby_list_append(List *l, void *data) __attribute__ ((alias ("_list_append")));
 int tabby_list_prepend(List *l, void *data) __attribute__ ((alias ("_list_prepend")));
@@ -52,14 +56,24 @@ static inline void tabby_list_node_init(List *l, ListNode *node) {
     node->data = NULL;
 }
 
-List *_list_new(LockType type) {
+static int _l_default(void *data) {
+    return 1;
+}
+
+List *_list_new_ex(LockType type, ListGetFunc _get, ListPutFunc _put) {
     List *l = MALLOC(sizeof(List));
     if ( l ) {
         l->list_num = 0;
         tabby_lock_init(&l->list_lock, type);
         tabby_list_node_init(l, &l->list_head);
+        l->l_get = _get;
+        l->l_put = _put;
     }
     return l;
+}
+
+List *_list_new(LockType type) {
+    return _list_new_ex(type, _l_default, _l_default);
 }
 
 static inline void _do_list_insert(ListNode *n, ListNode *prev, ListNode *next) {
@@ -70,10 +84,13 @@ static inline void _do_list_insert(ListNode *n, ListNode *prev, ListNode *next) 
 }
 
 int _list_append(List *l, void *data) {
+    int ref;
     ListNode *n = MALLOC(sizeof(ListNode));
     if ( !n ) {
         return -1;
     }
+    ref = l->l_get(data);
+    assert( ref > 0 );
     n->data = data;
     n->__l = l;
     tabby_lock_protect(&l->list_lock, 0)  {
@@ -85,10 +102,13 @@ int _list_append(List *l, void *data) {
 }
 
 int _list_prepend(List *l, void *data) {
+    int ref;
     ListNode *n = MALLOC(sizeof(ListNode));
     if ( !n ) {
         return -1;
     }
+    ref = l->l_get(data);
+    assert( ref > 0 );
     n->data = data;
     n->__l = l;
     tabby_lock_protect(&l->list_lock, 0)  {
@@ -111,7 +131,7 @@ static inline ListNode *_do_list_del(List *l, ListNode *n) {
 
 int _list_del(List *l, void *data) {
     ListNode *n; 
-    int ret = -1;
+    int ret = -1, ref;
 
     tabby_lock_protect(&l->list_lock, 0)  {
         n = _list_first(l);
@@ -128,11 +148,14 @@ int _list_del(List *l, void *data) {
 
     if ( 0 == ret ) {
         FREE(n);
+        ref = l->l_put(data);
+        assert( ref >= 0 );
     }
     return ret;
 }
 
 void *_list_del_first(List *l) {
+    int ref;
     void *data = NULL;
     ListNode *tmp, *n = NULL; 
 
@@ -148,11 +171,14 @@ void *_list_del_first(List *l) {
 
     if ( n ) {
         FREE(n);
+        ref = l->l_put(data);
+        assert( ref >= 0 );
     }
     return data;
 }
 
 void *_list_del_last(List *l) {
+    int ref;
     void *data = NULL;
     ListNode *tmp, *n = NULL; 
 
@@ -168,6 +194,8 @@ void *_list_del_last(List *l) {
 
     if ( n ) {
         FREE(n);
+        ref = l->l_put(data);
+        assert( ref >= 0 );
     }
     return data;
 }
@@ -193,8 +221,9 @@ int _list_foreach(List *l, ListNodeProcess proc) {
 }
 
 void _list_free(List *l) {
-    int32_t cnt, num;
+    int32_t cnt, num, ref;
     ListNode *n;
+    void *data;
 
     // clear all nodes
     tabby_lock_protect(&l->list_lock, 0) {
@@ -202,10 +231,13 @@ void _list_free(List *l) {
         num = l->list_num;
         n = _list_first(l);
         while ( n != &l->list_head ) {
+            data = n->data;
             _do_list_del(l, n);
             FREE(n);
             n = _list_first(l);
             cnt++;
+            ref = l->l_put(data);
+            assert( ref >= 0 );
         }
 
         assert( cnt == num );

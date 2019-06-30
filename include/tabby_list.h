@@ -5,10 +5,14 @@
 #include "tabby_lock.h"
 #include "tabby_assert.h"
 
+typedef int (*ListGetFunc)(void *data);
+typedef int (*ListPutFunc)(void *data);
+
 typedef struct _List List;
 
 typedef void (*ListNodeProcess)(void *data) ;
 
+List *tabby_list_new_ex(LockType type, ListGetFunc _get, ListPutFunc _put);
 List *tabby_list_new(LockType type) ;
 void tabby_list_free(List *l) ;
 int tabby_list_append(List *l, void *data) ;

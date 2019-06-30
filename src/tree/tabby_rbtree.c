@@ -1033,6 +1033,7 @@ int _rbtree_delete(RBTree *tree, void *key) {
     // release resource
     if ( del_node ) {
         tree->t_det(del_key, del_value);
+        tree->t_put(del_value);
         FREE( del_node );
         ret = 0;
     }
