@@ -151,9 +151,9 @@ int main() {
         if ( tret == -2 ) {
             mvprintw(LINES-2, 0, "cmd: %s error, type 'ins NUM' to insert, type 'quit' to exit", cmd);
         } else if ( tret == -1 ) {
-            mvprintw(LINES-2, 0, "insert %d failed, already exists", value);
+            mvprintw(LINES-2, 0, "%s %d failed", cmd, value);
         } else {
-            mvprintw(LINES-2, 0, "insert %d successfully", value);
+            mvprintw(LINES-2, 0, "%s %d successfully", cmd, value);
         }
 
         move(0, 0);

@@ -461,6 +461,7 @@ int _rbtree_insert(RBTree *tree, void *key, void *value) {
                 cur = new_node;
                 _rbtree_insert_leaf(tree, cur, parent, ctype, key, value) ;
                 _rbtree_rebalance(tree, cur, parent, ctype) ;
+                tree->cnt++;
             }
         }
     }
@@ -691,7 +692,7 @@ static RBNode *_l_bbr(RBTree *tree, RBNode *cur, RBNode *parent, RBNode *sibling
     assert( local_left->color == COLOR_BLACK );
     local_root->color = COLOR_BLACK;
     local_left->color = COLOR_RED;
-    
+
     *recur = 1;
     return local_root;
 }
@@ -934,9 +935,10 @@ static void _rbtree_del_rebalance(RBTree *tree, RBNode *cur, RBNode *parent) {
     } else {
         // recur end
         //assert( new_root->color == COLOR_RED );
-        new_root->color = COLOR_BLACK;
+        //new_root->color = COLOR_BLACK;
+        assert( new_root->color == COLOR_BLACK );
         tree->root = new_root;
-        return ;
+        //return ;
     }
 
     assert( recur == 0 || recur == 1);
@@ -1023,6 +1025,8 @@ int _rbtree_delete(RBTree *tree, void *key) {
             del_key = node->key;
             del_value = node->value;
             del_node = _rbtree_do_delete(tree, node);
+            tree->cnt--;
+            assert(tree->cnt >= 0 );
         }
     }
 
