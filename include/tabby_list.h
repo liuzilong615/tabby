@@ -7,10 +7,12 @@
 
 typedef int (*ListGetFunc)(void *data);
 typedef int (*ListPutFunc)(void *data);
+//typedef int64_t (*ListCmpFunc)(int64_t me, int64_t they);
+typedef int64_t (*ListKeyFunc)(void *data);
 
 typedef struct _List List;
 
-typedef void (*ListNodeProcess)(void *data) ;
+typedef int (*ListNodeProcess)(void *data) ;
 
 List *tabby_list_new_ex(LockType type, ListGetFunc _get, ListPutFunc _put);
 List *tabby_list_new(LockType type) ;
