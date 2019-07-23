@@ -3,6 +3,7 @@
 
 #include "tabby_lock.h"
 
+// rbtree
 typedef int (*RBTreeCompareFunc)(void *skey, void *tkey);
 typedef int (*RBTreeGetFunc)(void *value);
 typedef int (*RBTreePutFunc)(void *value);
@@ -21,5 +22,11 @@ int tabby_rbtree_insert(RBTree *tree, void *key, void *value);
 int tabby_rbtree_foreach(RBTree *tree, RBTreeNodeProc proc);
 void tabby_rbtree_free(RBTree *tree);
 int tabby_rbtree_delete(RBTree *tree, void *key);
+
+// B+ tree
+typedef struct _BPTree BPTree;
+typedef int (*BPTreeGetFunc)(void *value);
+typedef int (*BPTreePutFunc)(void *value);
+//typedef int (*BPTreeCmpFunc)(int64_t me, int64_t other);
 
 #endif

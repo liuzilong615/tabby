@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "tabby_tree.h"
 
 #define BPKEY_SIZE (128)
@@ -65,7 +66,7 @@ struct _BPTree {
     BPNode *root;
 } ;
 
-typedef struct _BPTree BPTree;
+//typedef struct _BPTree BPTree;
 
 typedef int (*BPTreeGetFunc)(void *value);
 typedef int (*BPTreePutFunc)(void *value);
@@ -96,10 +97,10 @@ BPTree *bptree_new_ex(LockType type, int m, BPTreeGetFunc _get, BPTreePutFunc _p
     return bptree;
 }
 
-static inline void __init_node(BPNode *n) {
+static inline void __init_node(BPNode *n, int max_branches, int size) {
     memset(n, 0, size);
-    n->bp_values = &(n->buf[0]);
-    n->bp_children = &(n->buf[m*sizeof(BPValue)]);
+    n->bp_values = (struct _BPValue *)&(n->buf[0]);
+    n->bp_children = (struct _BPNode **)&(n->buf[max_branches*sizeof(BPValue)]);
 }
 
 static inline BPNode *__alloc_node(BPTree *tree) {
@@ -111,7 +112,7 @@ static inline BPNode *__alloc_node(BPTree *tree) {
 
     n = MALLOC(size);
     if ( n ) {
-        __init_node(n);
+        __init_node(n, m, size);
     }
     return n;
 }
@@ -175,16 +176,18 @@ static inline int __find_idx(BPNode *n, int64_t k) {
     return ret;
 }
 
+#if 0
 static inline void __do_move_bpvalue(BPNode *n, int startidx) {
     int i;
-    for ( i=n->bp_cnt; i>startix; i-- ) {
+    for ( i=n->bp_cnt; i>startidx; i-- ) {
         memcpy(&n->bp_values[i], &n->bp_values[i-1], sizeof(BPValue));
     }
 }
+#endif
 
 // insert after cur_idx
 static inline void __do_insert_internal(BPTree *tree, BPNode *cur, BPNode *next, int cur_idx, int64_t key) {
-    BPNode *parent_node, *new_node;
+    BPNode *parent_node, *new_parent_node;
     int i, left_children_cnt, right_children_cnt;
     int64_t new_key;
 
@@ -192,7 +195,7 @@ static inline void __do_insert_internal(BPTree *tree, BPNode *cur, BPNode *next,
 
     if ( cur->parent == NULL ) {
         parent_node = __alloc_node(tree);
-        assert( new_root != NULL );
+        assert( parent_node != NULL );
         assert( cur_idx == 0);
         next->idx_in_pnode = 1;
 
@@ -216,14 +219,14 @@ static inline void __do_insert_internal(BPTree *tree, BPNode *cur, BPNode *next,
 #endif
             // do move
             for ( i=parent_node->bp_cnt; i>cur_idx; i--) {
-                memcpy(&parent_node->bp_value[i], &parent_node->bp_value[i-1], sizeof(BPValue));
+                memcpy(&parent_node->bp_values[i], &parent_node->bp_values[i-1], sizeof(BPValue));
                 parent_node->bp_children[i+1] = parent_node->bp_children[i];
                 parent_node->bp_children[i+1]->idx_in_pnode++;
                 assert(parent_node->bp_children[i+1]->idx_in_pnode == i+1 );
             }
             // do insert node
-            parent_node->bp_value[cur_idx].key = key; //next->bp_values[0].key;
-            parent_node->bp_value[cur_idx].value = NULL;
+            parent_node->bp_values[cur_idx].key = key; //next->bp_values[0].key;
+            parent_node->bp_values[cur_idx].value = NULL;
             parent_node->bp_children[cur_idx + 1] = next;
             next->idx_in_pnode = cur_idx + 1;
             assert( next->parent == parent_node );
@@ -248,7 +251,7 @@ static inline void __do_insert_internal(BPTree *tree, BPNode *cur, BPNode *next,
                 }
 
                 // update cnt
-                new_parent_node->pb_cnt = right_children_cnt - 1;
+                new_parent_node->bp_cnt = right_children_cnt - 1;
                 parent_node->bp_cnt = left_children_cnt - 1;
 
                 // update list
@@ -347,7 +350,7 @@ int bptree_insert(BPTree *tree, int64_t k, void *v) {
     ref = tree->bp_get(v);
     assert( ref > 0 );
 
-    tabby_lock_protect(&tree->tree_lock, 0) {
+    tabby_lock_protect(&tree->bp_lock, 0) {
         // make sure root exists
         if ( !tree->root ) {
             tree->root = __alloc_node(tree);

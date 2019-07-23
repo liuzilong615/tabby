@@ -152,29 +152,31 @@ static inline ListNode *_do_list_del(List *l, ListNode *n) {
     return n;
 }
 
-int _list_del(List *l, int64_t key) {
+void *_list_del(List *l, int64_t key) {
     ListNode *n; 
-    int ret = -1, ref;
+    void *data;
+    int ref;
 
     tabby_lock_protect(&l->list_lock, 0)  {
         n = _list_first(l);
         while ( n != &l->list_head ) {
             if ( n->list_key == key ) {
+                data = n->list_data;
                 _do_list_del(l, n);
                 l->list_num--;
-                ret = 0;
                 break;
             }
             n = n->next;
         }
+        n = NULL;
     }
 
-    if ( 0 == ret ) {
+    if ( n ) {
         FREE(n);
         ref = l->l_put(data);
         assert( ref >= 0 );
     }
-    return ret;
+    return data;
 }
 
 void *_list_del_first(List *l) {
@@ -186,7 +188,7 @@ void *_list_del_first(List *l) {
         tmp = _list_first(l);
         if ( tmp != &l->list_head ) {
             n = tmp;
-            data = n->data;
+            data = n->list_data;
             _do_list_del(l, n);
             l->list_num--;
         }
@@ -209,7 +211,7 @@ void *_list_del_last(List *l) {
         tmp = _list_last(l);
         if ( tmp != &l->list_head ) {
             n = tmp;
-            data = n->data;
+            data = n->list_data;
             _do_list_del(l, n);
             l->list_num--;
         }
@@ -233,7 +235,7 @@ int _list_foreach(List *l, ListNodeProcess proc) {
         num = l->list_num;
         while ( n != &l->list_head ) {
             cnt++;
-            brk = proc(n->data);
+            brk = proc(n->list_data);
             if ( brk != 0 ) {
                 break;
             }
@@ -257,7 +259,7 @@ void _list_clear(List *l) {
         num = l->list_num;
         n = _list_first(l);
         while ( n != &l->list_head ) {
-            data = n->data;
+            data = n->list_data;
             _do_list_del(l, n);
             FREE(n);
             n = _list_first(l);
@@ -309,14 +311,17 @@ static void _do_list_sort(List *l) {
 
 int _list_sort(List *l) {
     tabby_lock_protect(&l->list_lock, 0) {
-        _do_list_sort(l)
+        _do_list_sort(l);
     }
+    return 0;
 }
 
 
 int _list_insert_sort(List *l, void *data) {
-    ListNode *cur, *prev;
+    int ref;
+    ListNode *cur;
     ListNode *n = MALLOC(sizeof(ListNode));
+
     if ( !n ) {
         return -1;
     }
@@ -328,7 +333,7 @@ int _list_insert_sort(List *l, void *data) {
 
     tabby_lock_protect(&l->list_lock, 0) {
         if ( !l->sorted ) {
-            _do_list_sort(l)
+            _do_list_sort(l);
         }
         cur = _list_first(l);
         while ( cur != &l->list_head ) {
